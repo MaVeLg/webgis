@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
 import { useSplit } from '../composables/useSplit.js';
-import HeaderBar from '../components/HeaderBar.vue';
-import Footer from '../components/Footer.vue';
+import TheHeader from '../components/TheHeader.vue';
+import TheFooter from '../components/TheFooter.vue';
 import TopSplit from '../components/TopSplit.vue';
 import BottomPanel from '../components/BottomPanel.vue';
 //import { useLayersStore } from '../stores/useLayersStore';
@@ -148,7 +148,7 @@ onMounted(async () => {
 
 <template>
   <div style="display:flex;flex-direction:column;height:100%;">
-    <HeaderBar />
+    <TheHeader />
 
     <div class="root">
       <div id="topWrap">
@@ -170,7 +170,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <Footer class="footer" />
+    <TheFooter class="footer" />
   </div>
 </template>
 

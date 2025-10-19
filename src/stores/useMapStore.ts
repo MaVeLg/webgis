@@ -1,8 +1,9 @@
-// src/stores/useMapStore.ts
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import maplibregl, { Map, LngLatLike, MapOptions, MapStyle } from 'maplibre-gl'
 
 type MapStatus = 'idle' | 'initializing' | 'ready' | 'error'
+export type Coords = { lng: number; lat: number } | null
 
 export const useMapStore = defineStore('map', {
   state: () => ({
@@ -10,6 +11,8 @@ export const useMapStore = defineStore('map', {
     map: null as Map | null,
     status: 'idle' as MapStatus,
     lastError: null as unknown,
+    coords: null as Coords,
+    zoom: 0 as number
   }),
 
   getters: {
@@ -59,16 +62,24 @@ export const useMapStore = defineStore('map', {
           ...rest,
         })
 
+        console.log("rest=", rest)
+
+        this.zoom = zoom
+
         // Standard-Controls (optional)
         map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
         map.addControl(new maplibregl.ScaleControl({ maxWidth: 200, unit: 'metric' }))
 
-        await new Promise<void>((resolve) => {
-          map.once('load', () => resolve())
+        await new Promise<void>((resolve) => { map.once('load', () => resolve()) })
+
+        this.map = markRaw(map)
+        this.status = 'ready'
+
+        // Event listeners
+        map.on('zoom', () => {
+          this.zoom = map.getZoom()
         })
 
-        this.map = map
-        this.status = 'ready'
         return map
       } catch (err) {
         this.lastError = err
@@ -105,6 +116,7 @@ export const useMapStore = defineStore('map', {
 
     setZoom(zoom: number) {
       this.map?.setZoom(zoom)
+      this.zoom = zoom
     },
 
     addSource(id: string, source: maplibregl.AnySourceData) {
@@ -147,6 +159,13 @@ export const useMapStore = defineStore('map', {
         this.lastError = null
       }
     },
+
+    setCoords(lng: number, lat: number) {
+      this.coords = { lng, lat }
+    },
+    clearCoords() {
+      this.coords = null
+    }
   },
 })
 
